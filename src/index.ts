@@ -167,8 +167,10 @@ function onError(err: AxiosError) {
   // Determine if we should retry the request
   const shouldRetryFn = config.shouldRetry || shouldRetryRequest;
   if (!shouldRetryFn(err)) {
+    console.log('rejecting');
     return Promise.reject(err);
   }
+  console.log('retrying I think');
 
   // Create a promise that invokes the retry after the backOffDelay
   const onBackoffPromise = new Promise(resolve => {
@@ -209,6 +211,7 @@ function shouldRetryRequest(err: AxiosError) {
 
   // If there's no config, or retries are disabled, return.
   if (!config || config.retry === 0) {
+    console.log(1);
     return false;
   }
 
@@ -217,10 +220,13 @@ function shouldRetryRequest(err: AxiosError) {
     !err.response &&
     (config.currentRetryAttempt || 0) >= config.noResponseRetries!
   ) {
+    console.log(2);
     return false;
   }
 
   // Only retry with configured HttpMethods.
+  console.log('method: ' + err.config.method);
+  console.log(config.httpMethodsToRetry);
   if (
     !err.config.method ||
     config.httpMethodsToRetry!.indexOf(err.config.method.toUpperCase()) < 0
