@@ -125,6 +125,10 @@ function normalizeArray<T>(obj?: T[]): T[] | undefined {
 }
 
 function onError(err: AxiosError) {
+  if (axios.isCancel(err)) {
+    return Promise.reject(err);
+  }
+
   const config = getConfig(err) || {};
   config.currentRetryAttempt = config.currentRetryAttempt || 0;
   config.retry =
@@ -162,7 +166,7 @@ function onError(err: AxiosError) {
     normalizeArray(config.statusCodesToRetry) || retryRanges;
 
   // Put the config back into the err
-  (err.config as RaxConfig).raxConfig = { ...config };
+  (err.config as RaxConfig).raxConfig = {...config};
 
   // Determine if we should retry the request
   const shouldRetryFn = config.shouldRetry || shouldRetryRequest;
